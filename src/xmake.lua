@@ -33,3 +33,13 @@ end
 if get_config("enable_clangcxx") then
     includes("clangcxx")
 end
+
+target("lc_pybind11")
+set_kind("headeronly")
+on_load(function(target)
+	local function rela(p)
+		return path.relative(path.absolute(p, os.scriptdir()), os.projectdir())
+	end
+	target:add("includedirs", rela("ext/pybind11/include"), { public = true })
+end)
+target_end()

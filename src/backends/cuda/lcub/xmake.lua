@@ -73,7 +73,7 @@ add_cuflags("-DDCUB_DLL_EXPORTS", {
     public = false
 })
 add_cugencodes("native")
-add_cugencodes("compute_75")
+add_cugencodes("compute_89")
 add_deps("lcub_env")
 target_end()
 

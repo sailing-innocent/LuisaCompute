@@ -271,20 +271,20 @@ on_load(function(target)
             target:add("vectorexts", "avx", "avx2")
         end
     end
-    if _get_or("no_rtti", not get_config("_lc_enable_py")) then
-        target:add("cxflags", "/GR-", {
-            tools = { "clang_cl", "cl" },
-            public = true
-        })
-        target:add("cxflags", "-fno-rtti", "-fno-rtti-data", {
-            tools = { "clang" },
-            public = true
-        })
-        target:add("cxflags", "-fno-rtti", {
-            tools = { "gcc" },
-            public = true
-        })
-    end
+    -- if _get_or("no_rtti", not get_config("_lc_enable_py")) then
+    --     target:add("cxflags", "/GR-", {
+    --         tools = { "clang_cl", "cl" },
+    --         public = true
+    --     })
+    --     target:add("cxflags", "-fno-rtti", "-fno-rtti-data", {
+    --         tools = { "clang" },
+    --         public = true
+    --     })
+    --     target:add("cxflags", "-fno-rtti", {
+    --         tools = { "gcc" },
+    --         public = true
+    --     })
+    -- end
 end)
 rule_end()
 
