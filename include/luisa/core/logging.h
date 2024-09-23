@@ -15,6 +15,9 @@
 #include <luisa/core/stl/format.h>
 #include <luisa/core/platform.h>
 
+
+#include <iostream>
+
 // forward declaration for Rust binding
 struct LCLoggerMessage;
 
@@ -40,6 +43,7 @@ inline void log_verbose(Args &&...args) noexcept {
 
 template<typename... Args>
 inline void log_info(Args &&...args) noexcept {
+    std::cout << "Logging " << std::endl; // pass 
     detail::default_logger().info(std::forward<Args>(args)...);
 }
 

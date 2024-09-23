@@ -161,3 +161,5 @@ if get_config('_lc_check_env') then
     end
     includes("src")
 end
+
+includes("app")
