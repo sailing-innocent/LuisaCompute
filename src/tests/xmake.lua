@@ -102,6 +102,7 @@ if get_config("enable_ir") then
     test_proj('test_autodiff_full')
 end
 test_proj("test_alloc")
+test_proj("test_helloworld")
 test_proj("test_ast")
 test_proj("test_atomic")
 test_proj("test_bindless", true)
@@ -146,6 +147,12 @@ test_proj("test_sparse_texture", true)
 test_proj("test_pinned_mem")
 test_proj("test_imgui", true, function()
     add_deps("imgui")
+end)
+test_proj("test_zip", false, function()
+    add_packages("zlib", {
+        public = false,
+        inherit = false
+    })
 end)
 if get_config("dx_backend") then
     test_proj("test_raster", true)
@@ -237,7 +244,7 @@ if get_config("dx_backend") and (enable_fsr2 or enable_xess) then
         end)
     end)
 end
-includes("amd")
+-- includes("amd")
 if get_config("dx_backend") and enable_fsr3 then
     test_proj("test_fsr3", true, function()
         set_pcxxheader("pch.h")

@@ -218,7 +218,6 @@ tags
 ### VisualStudioCode template
 .vscode/*
 !.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
 
@@ -328,3 +327,4 @@ scripts/options.cmake
 .deps/**
 FidelityFX-FSR2/
 xess/
+!xrepo/**

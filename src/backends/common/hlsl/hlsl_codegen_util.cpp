@@ -9,6 +9,7 @@
 #include <luisa/core/logging.h>
 #include <luisa/ast/external_function.h>
 #include "builtin/hlsl_builtin.hpp"
+#include <zlib/zlib.h>
 static bool shown_buffer_warning = false;
 namespace lc::hlsl {
 static std::atomic_bool rootsig_exceed_warned = false;
@@ -57,8 +58,32 @@ struct SpirVRegisterIndexer : public RegisterIndexer {
         return count;
     }
 };
+
 vstd::string_view CodegenUtility::ReadInternalHLSLFile(vstd::string_view name) {
-    return lc_hlsl::get_hlsl_builtin(name);
+    struct CachedHeader {
+        std::mutex mtx;
+        vstd::vector<char> result;
+    };
+    static vstd::HashMap<vstd::string, CachedHeader> headers;
+    static std::mutex header_mtx;
+    auto iter = [&]() {
+        std::lock_guard lck{header_mtx};
+        return headers.emplace(name);
+    }();
+    auto &v = iter.value();
+    {
+        std::lock_guard lck{v.mtx};
+        if (v.result.empty()) {
+            auto compressed = lc_hlsl::get_hlsl_builtin(name);
+            v.result.push_back_uninitialized(compressed.uncompressed_size);
+            uLong dest_len = compressed.uncompressed_size;
+            auto r = uncompress((Bytef *)v.result.data(), &dest_len, (Bytef const *)compressed.ptr, compressed.compressed_size);
+            if (r != Z_OK) [[unlikely]] {
+                LUISA_ERROR("Uncompress header failed. {}", r);
+            }
+        }
+    }
+    return {v.result.data(), v.result.size()};
 }
 namespace detail {
 static size_t AddHeader(CallOpSet const &ops, vstd::StringBuilder &builder, bool isRaster) {
@@ -685,7 +710,7 @@ void CodegenUtility::GetFunctionName(CallExpr const *expr, vstd::StringBuilder &
             return;
         }
         case CallOp::TEXTURE_READ:
-            str << "_Smptx";
+            str << "_Readtx";
             break;
         case CallOp::TEXTURE_WRITE:
             str << "_Writetx";
@@ -1229,6 +1254,28 @@ void CodegenUtility::GetFunctionName(CallExpr const *expr, vstd::StringBuilder &
         case CallOp::UNPACK: LUISA_NOT_IMPLEMENTED();
         case CallOp::BINDLESS_BUFFER_WRITE: LUISA_NOT_IMPLEMENTED();
         case CallOp::WARP_FIRST_ACTIVE_LANE: LUISA_NOT_IMPLEMENTED();
+        case CallOp::TEXTURE2D_SAMPLE:
+        case CallOp::TEXTURE3D_SAMPLE:
+            if (opt->isPixelShader) {
+                str << "_SmptxPixel"sv;
+            } else {
+                str << "_Smptx"sv;
+            }
+            break;
+        case CallOp::TEXTURE2D_SAMPLE_LEVEL:
+        case CallOp::TEXTURE3D_SAMPLE_LEVEL:
+            str << "_SmptxLevel"sv;
+            break;
+        case CallOp::TEXTURE3D_SAMPLE_GRAD:
+        case CallOp::TEXTURE2D_SAMPLE_GRAD:
+            str << "_SmptxGrad"sv;
+            break;
+        case CallOp::TEXTURE2D_SAMPLE_GRAD_LEVEL:
+            str << "_SmptxGrad2DLevel"sv;
+            break;
+        case CallOp::TEXTURE3D_SAMPLE_GRAD_LEVEL:
+            str << "_SmptxGrad3DLevel"sv;
+            break;
         case CallOp::SHADER_EXECUTION_REORDER:
             str << "(void)";
             break;
