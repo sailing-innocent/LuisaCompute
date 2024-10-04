@@ -43,6 +43,7 @@ on_load(function(target)
 	target:add("includedirs", rela("ext/pybind11/include"), { public = true })
 end)
 target_end()
--- add_requires("zlib >=1.2.8-skr", {
---     system = false
--- })
+
+add_requires("zlib >=1.2.8-skr", {
+    system = false
+})
