@@ -65,7 +65,7 @@ target_end()
 target("luisa-compute-cuda-ext-dcub")
 add_rules("cuda_ext")
 set_toolchains("cuda") -- compiler: nvcc
-set_languages("cxx17")
+-- set_languages("cxx17")
 set_kind("shared")
 add_files("private/dcub/*.cu")
 add_includedirs("../../../../include")
